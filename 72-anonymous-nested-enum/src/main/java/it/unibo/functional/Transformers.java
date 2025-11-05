@@ -54,7 +54,11 @@ public final class Transformers {
      * @return A transformed list where each input element is replaced with the produced elements
      */
     public static <I, O> List<O> transform(final Iterable<I> base, final Function<I, O> transformer) {
-        return null;
+        final var result = new ArrayList<O>();
+        for (final I input : Objects.requireNonNull(base, "The base iterable cannot be null")) {
+            result.add(transformer.call(input));
+        }
+        return result;
     }
 
     /**
