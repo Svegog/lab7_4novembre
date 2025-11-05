@@ -3,6 +3,7 @@ package it.unibo.functional;
 import it.unibo.functional.api.Function;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -54,11 +55,14 @@ public final class Transformers {
      * @return A transformed list where each input element is replaced with the produced elements
      */
     public static <I, O> List<O> transform(final Iterable<I> base, final Function<I, O> transformer) {
-        var result = new ArrayList<O>();
-        for (final I elem : Objects.requireNonNull(base, "The base iterable cannot be null")) {
-            result.add(transformer.call(elem));
-        }
-        return result;
+        return flattenTransform(base, new Function<I,Collection<? extends O>>() {
+            @Override
+            public Collection<? extends O> call(I input) {
+                var result = new ArrayList<O>();
+                result.add(transformer.call(input));
+                return result;
+            }
+        });
     }
 
     /**
@@ -74,11 +78,7 @@ public final class Transformers {
      * @return A flattened list with the elements of each collection in the input
      */
     public static <I> List<? extends I> flatten(final Iterable<? extends Collection<? extends I>> base) {
-        var result = new ArrayList<I>();
-        for (Collection<? extends I> collection : base) {
-            result.addAll(transform(collection, Function.identity()));
-        }
-        return result;
+        return flattenTransform(base, Function.identity());
     }
 
     /**
@@ -95,13 +95,15 @@ public final class Transformers {
      * @return A list containing only the elements that passed the test
      */
     public static <I> List<I> select(final Iterable<I> base, final Function<I, Boolean> test) {
-        var result = new ArrayList<I>();
-        for (I elem : Objects.requireNonNull(base, "The base iterable can't be null")) {
-            if(test.call(elem)) {
-                result.add(elem);
-            }
-        }
-        return result;
+        return flattenTransform(base, new Function<I,Collection<? extends I>>() {
+            @Override
+            public Collection<? extends I> call(I input) {
+                if(test.call(input)) {
+                    return Arrays.asList(input);
+                } 
+                return new ArrayList<>();
+            }  
+        });
     }
 
     /**
@@ -117,12 +119,11 @@ public final class Transformers {
      * @return A list containing only the elements that passed the test
      */
     public static <I> List<I> reject(final Iterable<I> base, final Function<I, Boolean> test) {
-        var result = new ArrayList<I>();
-        for (I elem : Objects.requireNonNull(base, "The base iterable can't be null")) {
-            if(!test.call(elem)) {
-                result.add(elem);
-            }
-        }
-        return result;
+        return select(base, new Function<I,Boolean>() {
+            @Override
+            public Boolean call(I input) {
+                return !test.call(input);
+            } 
+        });
     }
 }
