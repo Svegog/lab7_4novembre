@@ -54,9 +54,9 @@ public final class Transformers {
      * @return A transformed list where each input element is replaced with the produced elements
      */
     public static <I, O> List<O> transform(final Iterable<I> base, final Function<I, O> transformer) {
-        final var result = new ArrayList<O>();
-        for (final I input : Objects.requireNonNull(base, "The base iterable cannot be null")) {
-            result.add(transformer.call(input));
+        var result = new ArrayList<O>();
+        for (final I elem : Objects.requireNonNull(base, "The base iterable cannot be null")) {
+            result.add(transformer.call(elem));
         }
         return result;
     }
@@ -74,7 +74,11 @@ public final class Transformers {
      * @return A flattened list with the elements of each collection in the input
      */
     public static <I> List<? extends I> flatten(final Iterable<? extends Collection<? extends I>> base) {
-        return null;
+        var result = new ArrayList<I>();
+        for (Collection<? extends I> collection : base) {
+            result.addAll(transform(collection, Function.identity()));
+        }
+        return result;
     }
 
     /**
@@ -91,7 +95,13 @@ public final class Transformers {
      * @return A list containing only the elements that passed the test
      */
     public static <I> List<I> select(final Iterable<I> base, final Function<I, Boolean> test) {
-        return null;
+        var result = new ArrayList<I>();
+        for (I elem : Objects.requireNonNull(base, "The base iterable can't be null")) {
+            if(test.call(elem)) {
+                result.add(elem);
+            }
+        }
+        return result;
     }
 
     /**
@@ -107,6 +117,12 @@ public final class Transformers {
      * @return A list containing only the elements that passed the test
      */
     public static <I> List<I> reject(final Iterable<I> base, final Function<I, Boolean> test) {
-        return null;
+        var result = new ArrayList<I>();
+        for (I elem : Objects.requireNonNull(base, "The base iterable can't be null")) {
+            if(!test.call(elem)) {
+                result.add(elem);
+            }
+        }
+        return result;
     }
 }
