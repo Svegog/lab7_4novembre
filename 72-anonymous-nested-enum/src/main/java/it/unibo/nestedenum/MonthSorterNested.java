@@ -47,16 +47,19 @@ public final class MonthSorterNested implements MonthSorter {
                 return result;
             } catch (IllegalArgumentException e) {
                 result = null;
-                for(Month elem : Month.values()) {
-                    if(elem.toString().toLowerCase().contains(value.toLowerCase())) {
-                        if(result != null) {
-                            throw new IllegalArgumentException("Ambiguos result for the string in input ( "+value+" )");
+
+                for (Month elem : Month.values()) {
+                    if (elem.toString().toLowerCase().contains(value.toLowerCase())) {
+                        if (result != null) {
+                            throw new IllegalArgumentException("Ambiguos result for the string in input ( "+value+" ):" +
+                                                                " multiple result for the same string"
+                                                              );
                         }
                         result = elem;
                     }
                 }
             
-                if(result == null) {
+                if (result == null) {
                     throw new IllegalArgumentException("The string in input ( "+value+" ) was not a Month");
                 }
 
@@ -67,13 +70,16 @@ public final class MonthSorterNested implements MonthSorter {
     }
 
     private class SortByMonthOrder implements Comparator<String> {
+
         @Override
         public int compare(String arg0, String arg1) {
             return Month.fromString(arg0).compareTo(Month.fromString(arg1));
         }
+
     }
 
     private class SortByDate implements Comparator<String> {
+        
         @Override
         public int compare(String arg0, String arg1) {
             return Integer.compare(Month.fromString(arg0).days,
